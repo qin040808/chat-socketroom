@@ -1,0 +1,21 @@
+input {
+  padding: 10px;
+  border: 0;
+  background-color: $greyColor;
+  box-shadow: 0 2px 4px rgba(50, 50, 93, 0.2);
+  border-radius: 5px;
+  font-size: 14px;
+  &:focus {
+    outline: none;
+  }
+}
+
+.loginBox {
+  box-shadow: $boxShadow;
+  background-color: white;
+  padding: 40px;
+  border-radius: 5px;
+  input {
+    width: 200px;
+  }
+}

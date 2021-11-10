@@ -1,0 +1,36 @@
+.room {
+  width: 90%;
+  justify-content: center;
+}
+.room__info {
+  display: flex;
+  flex-direction: column;
+}
+.room__lists {
+  width: 100%;
+  padding: 20px 10px;
+  overflow: auto;
+  background-color: $purple;
+  height: 30vh;
+  border-radius: 10px;
+  box-shadow: 0 3px 36px rgba(23, 55, 87, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+  li {
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+  }
+}
+.clients__lists {
+  width: 100%;
+  padding: 20px 10px;
+  overflow: auto;
+  background-color: $lightBlue;
+  height: 30vh;
+  border-radius: 10px;
+  box-shadow: 0 3px 36px rgba(23, 55, 87, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+  li {
+    margin-bottom: 30px;
+    font-weight: bold;
+  }
+}

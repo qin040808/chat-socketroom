@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap");
+@import "./variables.scss";
+@import "./chat.scss";
+@import "./login.scss";
+@import "./notifications.scss";
+@import "./room.scss";
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: $greyColor;
+  font-family: "Nanum Gothic", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  .loginBox,
+  .chatContainer,
+  .room {
+    display: none;
+  }
+  &.loggedOut {
+    .loginBox {
+      display: block;
+    }
+  }
+  &.loggedIn {
+    .room {
+      display: block;
+      display: flex;
+      &.joined{
+        .chatContainer {
+          display: block;
+        }
+      }
+    }
+  }
+}
