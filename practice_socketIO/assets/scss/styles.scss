@@ -18,7 +18,8 @@ body {
   min-height: 100%;
   .loginBox,
   .chatContainer,
-  .room {
+  .room,
+  .whisperChatContainer {
     display: none;
   }
   &.loggedOut {
@@ -30,8 +31,13 @@ body {
     .room {
       display: block;
       display: flex;
-      &.joined{
+      &.joined {
         .chatContainer {
+          display: block;
+        }
+      }
+      &.whisper {
+        .whisperChatContainer {
           display: block;
         }
       }

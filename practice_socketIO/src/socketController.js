@@ -17,8 +17,19 @@ const socketController = (socket, io) => {
     io.emit("updateRoom", { room_info });
   });
 
-  socket.on("sendMsg", ({ message }) =>
+  socket.on("sendMsg", ({ message }) => {
     io.to(socket.roomId).emit("newMsg", { message, nickname: socket.nickname, id: socket.id })
+    }
+  );
+  let to = [];
+  socket.on("whispered", ({ nickname }) => {
+    to = sockets.filter(data => data.nickname == nickname);
+  })
+  socket.on("sendWhisper", ({ message, id }) => {
+    console.log(id);
+    console.log(to[0].id);
+    io.to(id).to(to[0].id).emit("newWhisper", {message, nickname: socket.nickname, id:socket.id})
+  }
   );
 
   socket.on("addRoom", ({ message }) => {

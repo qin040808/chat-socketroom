@@ -5,17 +5,21 @@ const rooms = document.getElementById("jsRooms");
 const addRoom = document.getElementById("jsAddRoom");
 const roomWrapper = document.querySelector(".room");
 const chats = document.getElementById("jsMessages");
+let myRoom = '';
 
 const handleRoomClick = (roomId) => {
-  console.log(roomId);
-  if(confirm(`would you like to join ${roomId}?`)) {
-    getSocket().emit("enterRoom", {roomId});
-    roomWrapper.classList.add("joined");
-    while(chats.firstChild){
-      chats.removeChild(chats.lastChild);
+  if(myRoom!==roomId){
+    myRoom=roomId;
+    console.log(roomId);
+    if(confirm(`would you like to join ${roomId}?`)) {
+      getSocket().emit("enterRoom", {roomId});
+      roomWrapper.classList.add("joined");
+      while(chats.firstChild){
+        chats.removeChild(chats.lastChild);
+      }
+    } else {
+      
     }
-  } else {
-
   }
 }
 
@@ -54,6 +58,14 @@ const roomDelete =(roomId) => {
   }
 }
 
+const handleClientClick = (nick) => {
+  if(nick!== localStorage.getItem("nickname")) {
+     if (confirm(`whisper to ${nick}?`)) {
+      roomWrapper.classList.add("whisper");
+      getSocket().emit("whispered",{ nick });
+    }
+  }
+};
 const updateClients = (client_list) => {
   while (clients.hasChildNodes()) {
     clients.removeChild(clients.firstChild);
@@ -61,9 +73,11 @@ const updateClients = (client_list) => {
   client_list.forEach((nickname) => {
     const li = document.createElement("li");
     li.innerHTML = `${nickname}`;
+    li.addEventListener("click", () => handleClientClick(nickname));
     clients.appendChild(li);
   });
 };
+
 
 export const handleUpdatePlayer = ({ sockets }) => {
   let client_list = [];

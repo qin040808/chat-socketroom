@@ -4,18 +4,27 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.handleNewMessage = void 0;
+exports.handleNewWhisper = exports.handleNewMessage = void 0;
 
 var _sockets = require("./sockets");
 
 var messages = document.getElementById("jsMessages");
 var sendMsg = document.getElementById("jsSendMsg");
+var whispers = document.getElementById("jsWMessages");
+var whisperSend = document.getElementById("jsWSendMsg");
 
 var appendMsg = function appendMsg(text, nickname, id) {
   var li = document.createElement("li");
   li.innerHTML = "\n  <span class=\"author ".concat((0, _sockets.getSocket)().id !== id ? "out" : "self", "\">").concat((0, _sockets.getSocket)().id !== id ? nickname : "You", ":</span> ").concat(text, "\n  ");
   messages.appendChild(li);
   messages.scrollTo(0, messages.scrollHeight);
+};
+
+var appendWhisper = function appendWhisper(text, nickname, id) {
+  var li = document.createElement("li");
+  li.innerHTML = "\n  <i><span class=\"author ".concat((0, _sockets.getSocket)().id !== id ? "out" : "self", "\">").concat((0, _sockets.getSocket)().id !== id ? nickname : "You", ":</span> ").concat(text, "</i>\n  ");
+  whispers.appendChild(li);
+  whispers.scrollTo(0, whispers.scrollHeight);
 };
 
 var handleSendMsg = function handleSendMsg(event) {
@@ -28,17 +37,43 @@ var handleSendMsg = function handleSendMsg(event) {
   });
 };
 
+var handleSendWhisper = function handleSendWhisper(event) {
+  event.preventDefault();
+  console.log("input");
+  var input = whisperSend.querySelector("input");
+  var value = input.value;
+  input.value = "";
+  (0, _sockets.getSocket)().emit("sendWhisper", {
+    message: value,
+    id: (0, _sockets.getSocket)().id
+  });
+};
+
 var handleNewMessage = function handleNewMessage(_ref) {
   var message = _ref.message,
       nickname = _ref.nickname,
       id = _ref.id;
-  return appendMsg(message, nickname, id);
+  appendMsg(message, nickname, id);
 };
 
 exports.handleNewMessage = handleNewMessage;
 
+var handleNewWhisper = function handleNewWhisper(_ref2) {
+  var message = _ref2.message,
+      nickname = _ref2.nickname,
+      id = _ref2.id;
+  console.log("back");
+  appendWhisper(message, nickname, id);
+};
+
+exports.handleNewWhisper = handleNewWhisper;
+
 if (sendMsg) {
   sendMsg.addEventListener("submit", handleSendMsg);
+}
+
+if (whisperSend) {
+  whisperSend.addEventListener("submit", handleSendWhisper);
 }
 
 },{"./sockets":6}],2:[function(require,module,exports){
@@ -140,20 +175,24 @@ var rooms = document.getElementById("jsRooms");
 var addRoom = document.getElementById("jsAddRoom");
 var roomWrapper = document.querySelector(".room");
 var chats = document.getElementById("jsMessages");
+var myRoom = '';
 
 var handleRoomClick = function handleRoomClick(roomId) {
-  console.log(roomId);
+  if (myRoom !== roomId) {
+    myRoom = roomId;
+    console.log(roomId);
 
-  if (confirm("would you like to join ".concat(roomId, "?"))) {
-    (0, _sockets.getSocket)().emit("enterRoom", {
-      roomId: roomId
-    });
-    roomWrapper.classList.add("joined");
+    if (confirm("would you like to join ".concat(roomId, "?"))) {
+      (0, _sockets.getSocket)().emit("enterRoom", {
+        roomId: roomId
+      });
+      roomWrapper.classList.add("joined");
 
-    while (chats.firstChild) {
-      chats.removeChild(chats.lastChild);
-    }
-  } else {}
+      while (chats.firstChild) {
+        chats.removeChild(chats.lastChild);
+      }
+    } else {}
+  }
 };
 
 var handleLeave = function handleLeave(roomId) {
@@ -201,6 +240,17 @@ var roomDelete = function roomDelete(roomId) {
   } else {}
 };
 
+var handleClientClick = function handleClientClick(nick) {
+  if (nick !== localStorage.getItem("nickname")) {
+    if (confirm("whisper to ".concat(nick, "?"))) {
+      roomWrapper.classList.add("whisper");
+      (0, _sockets.getSocket)().emit("whispered", {
+        nick: nick
+      });
+    }
+  }
+};
+
 var updateClients = function updateClients(client_list) {
   while (clients.hasChildNodes()) {
     clients.removeChild(clients.firstChild);
@@ -209,6 +259,9 @@ var updateClients = function updateClients(client_list) {
   client_list.forEach(function (nickname) {
     var li = document.createElement("li");
     li.innerHTML = "".concat(nickname);
+    li.addEventListener("click", function () {
+      return handleClientClick(nickname);
+    });
     clients.appendChild(li);
   });
 };
@@ -281,6 +334,7 @@ var initSockets = function initSockets(aSocket) {
   socket.on("newUser", _notifications.handleNewUser);
   socket.on("disconnected", _notifications.handleDisconnected);
   socket.on("newMsg", _chat.handleNewMessage);
+  socket.on("newWhisper", _chat.handleNewWhisper);
   socket.on("updatePlayer", _room.handleUpdatePlayer);
   socket.on("updateRoom", _room.handleUpdateRoom);
   socket.on("leaveRoom", _room.handleLeave);

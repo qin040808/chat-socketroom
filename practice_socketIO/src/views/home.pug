@@ -21,5 +21,10 @@ html(lang="en")
                     ul.chat__messages#jsMessages
                     form.chat__form#jsSendMsg
                         input(placeholder="Write a message", type="text")
+            .whisperChatContainer
+                .chat
+                    ul.chat__messages#jsWMessages
+                    form.chat__form#jsWSendMsg
+                        input(placeholder="Whisper", type="text")            
         script(src="/socket.io/socket.io.js")
         script(src="/js/main.js")
