@@ -6,7 +6,6 @@ const addRoom = document.getElementById("jsAddRoom");
 const roomWrapper = document.querySelector(".room");
 const chats = document.getElementById("jsMessages");
 
-
 const handleRoomClick = (roomId) => {
   console.log(roomId);
   if(confirm(`would you like to join ${roomId}?`)) {
@@ -20,17 +19,40 @@ const handleRoomClick = (roomId) => {
   }
 }
 
+export const handleLeave = (roomId) => {
+  while(chats.firstChild){
+    chats.removeChild(chats.lastChild);
+  }
+  roomWrapper.classList.remove("joined");
+  getSocket().emit("leaveRequest",{roomId});
+}
+
 const updateRooms = (client_list) => {
   while (rooms.hasChildNodes()) {
     rooms.removeChild(rooms.firstChild);
   }
   client_list.forEach((roomId) => {
     const li = document.createElement("li");
-    li.innerHTML = `${roomId}`;
-    li.addEventListener("click", () => handleRoomClick(roomId));
+    li.innerHTML = ``;
+    const roomLi = document.createElement("span");
+    roomLi.innerHTML = `${roomId}&nbsp;`
+    roomLi.addEventListener("click", () => handleRoomClick(roomId));
+    const del = document.createElement("span");
+    del.innerHTML=`✕`;
+    del.addEventListener("click", () => roomDelete(roomId));
     rooms.appendChild(li);
+    li.appendChild(roomLi);
+    li.appendChild(del);
   });
 };
+
+const roomDelete =(roomId) => {
+  if(confirm(`delete ${roomId}?`)) {
+    getSocket().emit("removeRoom",{roomId});
+  } else {
+
+  }
+}
 
 const updateClients = (client_list) => {
   while (clients.hasChildNodes()) {

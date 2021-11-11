@@ -131,7 +131,7 @@ exports.handleDisconnected = handleDisconnected;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.handleUpdateRoom = exports.handleUpdatePlayer = void 0;
+exports.handleUpdateRoom = exports.handleUpdatePlayer = exports.handleLeave = void 0;
 
 var _sockets = require("./sockets");
 
@@ -156,6 +156,19 @@ var handleRoomClick = function handleRoomClick(roomId) {
   } else {}
 };
 
+var handleLeave = function handleLeave(roomId) {
+  while (chats.firstChild) {
+    chats.removeChild(chats.lastChild);
+  }
+
+  roomWrapper.classList.remove("joined");
+  (0, _sockets.getSocket)().emit("leaveRequest", {
+    roomId: roomId
+  });
+};
+
+exports.handleLeave = handleLeave;
+
 var updateRooms = function updateRooms(client_list) {
   while (rooms.hasChildNodes()) {
     rooms.removeChild(rooms.firstChild);
@@ -163,12 +176,29 @@ var updateRooms = function updateRooms(client_list) {
 
   client_list.forEach(function (roomId) {
     var li = document.createElement("li");
-    li.innerHTML = "".concat(roomId);
-    li.addEventListener("click", function () {
+    li.innerHTML = "";
+    var roomLi = document.createElement("span");
+    roomLi.innerHTML = "".concat(roomId, "&nbsp;");
+    roomLi.addEventListener("click", function () {
       return handleRoomClick(roomId);
     });
+    var del = document.createElement("span");
+    del.innerHTML = "\u2715";
+    del.addEventListener("click", function () {
+      return roomDelete(roomId);
+    });
     rooms.appendChild(li);
+    li.appendChild(roomLi);
+    li.appendChild(del);
   });
+};
+
+var roomDelete = function roomDelete(roomId) {
+  if (confirm("delete ".concat(roomId, "?"))) {
+    (0, _sockets.getSocket)().emit("removeRoom", {
+      roomId: roomId
+    });
+  } else {}
 };
 
 var updateClients = function updateClients(client_list) {
@@ -253,6 +283,7 @@ var initSockets = function initSockets(aSocket) {
   socket.on("newMsg", _chat.handleNewMessage);
   socket.on("updatePlayer", _room.handleUpdatePlayer);
   socket.on("updateRoom", _room.handleUpdateRoom);
+  socket.on("leaveRoom", _room.handleLeave);
 };
 
 exports.initSockets = initSockets;

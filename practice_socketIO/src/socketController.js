@@ -28,7 +28,20 @@ const socketController = (socket, io) => {
 
   socket.on("enterRoom", ({roomId}) => {
     socket.join(roomId);
+    if(socket.roomId){
+      socket.leave(socket.roomId);
+    }
     socket.roomId = roomId;
+  });
+
+  socket.on("removeRoom", ({roomId}) => {
+    io.to(roomId).emit("leaveRoom", {roomId});
+    room_info = room_info.filter(info => info.roomId !== roomId);
+    io.emit("updateRoom", {room_info});
+  });
+
+  socket.on("leaveRequest",({roomId}) => {
+    socket.leave(roomId);
   });
 };
 
