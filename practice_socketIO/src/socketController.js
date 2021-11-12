@@ -22,13 +22,12 @@ const socketController = (socket, io) => {
     }
   );
   let to = [];
-  socket.on("whispered", ({ nickname }) => {
-    to = sockets.filter(data => data.nickname == nickname);
+  socket.on("whispered", ({ nick }) => {
+    console.log("hi"+nick);
+    to = sockets.filter(data => data.nickname == nick);
   })
   socket.on("sendWhisper", ({ message, id }) => {
-    console.log(id);
-    console.log(to[0].id);
-    io.to(id).to(to[0].id).emit("newWhisper", {message, nickname: socket.nickname, id:socket.id})
+    io.to(id).to(to[0].id).emit("newWhisper", {message, nickname: socket.nickname, id:socket.id, des: to[0].nickname})
   }
   );
 

@@ -1,9 +1,11 @@
 import { getSocket } from "./sockets";
+import { handleWhisper } from "./notifications";
 
 const messages = document.getElementById("jsMessages");
 const sendMsg = document.getElementById("jsSendMsg");
 const whispers = document.getElementById("jsWMessages");
 const whisperSend = document.getElementById("jsWSendMsg");
+const roomWrapper = document.querySelector(".room");
 
 const appendMsg = (text, nickname, id) => {
   const li = document.createElement("li");
@@ -16,11 +18,11 @@ const appendMsg = (text, nickname, id) => {
   messages.scrollTo(0,messages.scrollHeight);
 };
 
-const appendWhisper = (text, nickname, id) => {
+const appendWhisper = (text, nickname, id, des) => {
   const li = document.createElement("li");
   li.innerHTML = `
   <i><span class="author ${getSocket().id !== id ? "out" : "self"}">${
-    getSocket().id !== id ? nickname : "You"
+    getSocket().id !== id ? nickname : `You (to ${des})`
   }:</span> ${text}</i>
   `;
   whispers.appendChild(li);
@@ -47,9 +49,12 @@ const handleSendWhisper = (event) => {
 export const handleNewMessage = ({ message, nickname, id }) => {
   appendMsg(message, nickname, id);
 }
-export const handleNewWhisper = ({message, nickname, id}) => {
+export const handleNewWhisper = ({message, nickname, id, des}) => {
   console.log("back");
-  appendWhisper(message, nickname, id);
+  appendWhisper(message, nickname, id, des);
+  if(!roomWrapper.classList.contains("whisper")){
+    handleWhisper({nickname});
+  }
 }
 
 if (sendMsg) {

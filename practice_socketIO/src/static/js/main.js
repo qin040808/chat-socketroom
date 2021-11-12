@@ -8,10 +8,13 @@ exports.handleNewWhisper = exports.handleNewMessage = void 0;
 
 var _sockets = require("./sockets");
 
+var _notifications = require("./notifications");
+
 var messages = document.getElementById("jsMessages");
 var sendMsg = document.getElementById("jsSendMsg");
 var whispers = document.getElementById("jsWMessages");
 var whisperSend = document.getElementById("jsWSendMsg");
+var roomWrapper = document.querySelector(".room");
 
 var appendMsg = function appendMsg(text, nickname, id) {
   var li = document.createElement("li");
@@ -20,9 +23,9 @@ var appendMsg = function appendMsg(text, nickname, id) {
   messages.scrollTo(0, messages.scrollHeight);
 };
 
-var appendWhisper = function appendWhisper(text, nickname, id) {
+var appendWhisper = function appendWhisper(text, nickname, id, des) {
   var li = document.createElement("li");
-  li.innerHTML = "\n  <i><span class=\"author ".concat((0, _sockets.getSocket)().id !== id ? "out" : "self", "\">").concat((0, _sockets.getSocket)().id !== id ? nickname : "You", ":</span> ").concat(text, "</i>\n  ");
+  li.innerHTML = "\n  <i><span class=\"author ".concat((0, _sockets.getSocket)().id !== id ? "out" : "self", "\">").concat((0, _sockets.getSocket)().id !== id ? nickname : "You (to ".concat(des, ")"), ":</span> ").concat(text, "</i>\n  ");
   whispers.appendChild(li);
   whispers.scrollTo(0, whispers.scrollHeight);
 };
@@ -61,9 +64,16 @@ exports.handleNewMessage = handleNewMessage;
 var handleNewWhisper = function handleNewWhisper(_ref2) {
   var message = _ref2.message,
       nickname = _ref2.nickname,
-      id = _ref2.id;
+      id = _ref2.id,
+      des = _ref2.des;
   console.log("back");
-  appendWhisper(message, nickname, id);
+  appendWhisper(message, nickname, id, des);
+
+  if (!roomWrapper.classList.contains("whisper")) {
+    (0, _notifications.handleWhisper)({
+      nickname: nickname
+    });
+  }
 };
 
 exports.handleNewWhisper = handleNewWhisper;
@@ -76,7 +86,7 @@ if (whisperSend) {
   whisperSend.addEventListener("submit", handleSendWhisper);
 }
 
-},{"./sockets":6}],2:[function(require,module,exports){
+},{"./notifications":4,"./sockets":6}],2:[function(require,module,exports){
 "use strict";
 
 var _sockets = require("./sockets");
@@ -135,7 +145,7 @@ require("./room");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.handleNewUser = exports.handleDisconnected = void 0;
+exports.handleWhisper = exports.handleNewUser = exports.handleDisconnected = void 0;
 var body = document.querySelector("body");
 
 var fireNotification = function fireNotification(text, color) {
@@ -146,19 +156,34 @@ var fireNotification = function fireNotification(text, color) {
   body.appendChild(notification);
 };
 
+var fireWNotification = function fireWNotification(text, color) {
+  var notification = document.createElement("div");
+  notification.innerText = text;
+  notification.style.backgroundColor = color;
+  notification.className = "wNotification";
+  body.appendChild(notification);
+};
+
 var handleNewUser = function handleNewUser(_ref) {
   var nickname = _ref.nickname;
-  return fireNotification("".concat(nickname, " just joined!"), "rgb(0, 122, 255)");
+  return fireNotification("".concat(nickname, " just joined!"), "rgb(0, 255, 122)");
 };
 
 exports.handleNewUser = handleNewUser;
 
 var handleDisconnected = function handleDisconnected(_ref2) {
   var nickname = _ref2.nickname;
-  return fireNotification("".concat(nickname, " just left!"), "rgb(255, 149, 0)");
+  return fireNotification("".concat(nickname, " just left!"), "rgb(255, 0, 50)");
 };
 
 exports.handleDisconnected = handleDisconnected;
+
+var handleWhisper = function handleWhisper(_ref3) {
+  var nickname = _ref3.nickname;
+  return fireWNotification("".concat(nickname, " whispers to you"), "rgb(0, 122, 255)");
+};
+
+exports.handleWhisper = handleWhisper;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -221,14 +246,19 @@ var updateRooms = function updateRooms(client_list) {
     roomLi.addEventListener("click", function () {
       return handleRoomClick(roomId);
     });
-    var del = document.createElement("span");
-    del.innerHTML = "\u2715";
-    del.addEventListener("click", function () {
-      return roomDelete(roomId);
-    });
     rooms.appendChild(li);
     li.appendChild(roomLi);
-    li.appendChild(del);
+
+    if (localStorage.getItem("nickname") == "Administrator") {
+      var del = document.createElement("span");
+      del.innerHTML = "\u2715";
+      del.addEventListener("click", function () {
+        return roomDelete(roomId);
+      });
+      li.appendChild(del);
+    }
+
+    ;
   });
 };
 
@@ -247,6 +277,12 @@ var handleClientClick = function handleClientClick(nick) {
       (0, _sockets.getSocket)().emit("whispered", {
         nick: nick
       });
+    }
+  } else {
+    if (roomWrapper.classList.contains("whisper")) {
+      if (confirm("don't show whisper chat?")) {
+        roomWrapper.classList.remove("whisper");
+      }
     }
   }
 };

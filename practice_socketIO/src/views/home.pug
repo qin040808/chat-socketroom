@@ -5,17 +5,17 @@ html(lang="en")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         link(rel="stylesheet", type="text/css", href="styles/styles.css")
-        title chatting-room
+        title soft-chat
     body
         .loginBox 
             form#jsLogin
                 input(placeholder="Enter your nickname", type="text")
         .room
             .room__info 
+                ul.clients__lists#jsClients
                 ul.room__lists#jsRooms
                 form.room__form#jsAddRoom
                     input(placeholder="Add a new room", type="text")
-                ul.clients__lists#jsClients
             .chatContainer
                 .chat
                     ul.chat__messages#jsMessages

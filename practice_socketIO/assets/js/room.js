@@ -41,12 +41,14 @@ const updateRooms = (client_list) => {
     const roomLi = document.createElement("span");
     roomLi.innerHTML = `${roomId}&nbsp;`
     roomLi.addEventListener("click", () => handleRoomClick(roomId));
-    const del = document.createElement("span");
-    del.innerHTML=`✕`;
-    del.addEventListener("click", () => roomDelete(roomId));
     rooms.appendChild(li);
     li.appendChild(roomLi);
-    li.appendChild(del);
+    if(localStorage.getItem("nickname")=="Administrator") {
+      const del = document.createElement("span");
+      del.innerHTML=`✕`;
+      del.addEventListener("click", () => roomDelete(roomId));
+      li.appendChild(del);
+    };
   });
 };
 
@@ -63,6 +65,12 @@ const handleClientClick = (nick) => {
      if (confirm(`whisper to ${nick}?`)) {
       roomWrapper.classList.add("whisper");
       getSocket().emit("whispered",{ nick });
+    }
+  } else {
+    if(roomWrapper.classList.contains("whisper")){
+      if (confirm(`don't show whisper chat?`)) {
+        roomWrapper.classList.remove("whisper");
+      }
     }
   }
 };
